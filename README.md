@@ -1,12 +1,4 @@
----
-title: "Derks et al, 2024"
-layout: default
-nav_order: 5
-permalink: Derks_et_al_2024
-description: "Single-nucleus proteomics identifies regulators of protein transport
-  | Slavov Laboratory"
-parent: "Single-nucleus protein data"
----
+
 
 ## Article:  [Single-nucleus proteomics identifies regulators of protein transport (Derks et al, 2024)](https://www.biorxiv.org/collection/systems-biology)
 &nbsp;
