@@ -1,7 +1,7 @@
 
 
 
-## Article:  [Single-nucleus proteomics identifies regulators of protein transport (Derks et al, 2024)](https://www.biorxiv.org/collection/systems-biology)
+## Article:  [Single-nucleus proteomics identifies regulators of protein transport (Derks et al, 2024)](https://www.biorxiv.org/content/10.1101/2024.06.17.599449v1)
 &nbsp;
 
 <h2 style="letter-spacing: 2px; font-size: 26px;" id="RAW-data" >Demonstrated aim:</h2>
