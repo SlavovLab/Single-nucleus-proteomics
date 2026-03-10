@@ -5,7 +5,7 @@ list(
   ####################### save plots
   
   ### bulk
-  tar_target(bulk_purity, save_plots(dat_bulk_purity_perSample, myfilename="Figures/Bulk_purity_perSample.pdf",mywidth=4.7,myheight=4.7)),
+  tar_target(bulk_purity_perSample, save_plots(dat_bulk_purity_perSample, myfilename="Figures/Bulk_purity_perSample.pdf",mywidth=4.7,myheight=4.7)),
 
   #### siRNA KDs
   tar_target(siRNA_WC_plot, save_plots_list(siRNA_WC_all$plot_list, myfilename="Figures/Supp/siRNA_KDs_WC",mywidth=3,myheight=3)),
