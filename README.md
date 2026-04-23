@@ -12,12 +12,12 @@ This work demonstrated an approach to infer novel functional regulators from (su
 
 <h2 style="letter-spacing: 2px; font-size: 26px;" id="RAW-data" >Methods:</h2>
 
-#### Bulk data:
+#### Bulk:
 Proteomics method: [plexDIA](https://scp.slavovlab.net/plexDIA)<br>
 Sample preparation method:  [mPOP](https://scp.slavovlab.net/mPOP)
 &nbsp;
 
-#### Single-nucleus data:
+#### Single-nucleus:
 Proteomics method: [SCoPE-DIA](https://scp.slavovlab.net/plexDIA)<br>
 Sample preparation method:  [nPOP](https://scp.slavovlab.net/nPOP)
 
@@ -25,7 +25,7 @@ Sample preparation method:  [nPOP](https://scp.slavovlab.net/nPOP)
 
 <h2 style="letter-spacing: 2px; font-size: 26px;" id="plexDIA-data" >Data organized by experiments</h2>
 
-All processed data from the [article](https://www.biorxiv.org/collection/systems-biology) are organized in this [directory](https://drive.google.com/drive/u/4/folders/1QqCclL1YUEG23zKSc20mR7ldea0K_Z6f).
+All processed data from the [article](https://www.biorxiv.org/collection/systems-biology) are organized in this [directory](https://drive.google.com/drive/u/4/folders/1QqCclL1YUEG23zKSc20mR7ldea0K_Z6f). Processed data is also available at [zenodo](https://doi.org/10.5281/zenodo.18773852).
 
  * [Single-nucleus data](https://drive.google.com/drive/folders/12zZpc3OUyGsrhaj6oH_N8Pss1oEIa6v4?usp=drive_link)
 
@@ -56,11 +56,4 @@ The [{targets} R package](https://books.ropensci.org/targets/) was used to ensur
 &nbsp;
 
 &nbsp;
-
-
-
-
-
-
-
 
