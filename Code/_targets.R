@@ -16,11 +16,11 @@ SC_fpath <- "/work/slavov/JD/DATA_SN"
 SC_fpath_Ext <- "/work/slavov/JD/DATA_SN_extracted"
 
 ############ BULK
-bulk_nuc_fpaths_tims <- "/work/slavov/JD/DATA_bulk_nuc" #BR 1, 2, 3, 4, 5, 6
-bulk_WC_fpaths_tims <- "/work/slavov/JD/DATA_bulk_WC" #BR 1, 2, 3, 4, 5, 6
+bulk_nuc_fpaths_tims <- "/Users/jasonderks/Nuc_data/DATA_bulk_nuc" #BR 1, 2, 3, 4, 5, 6
+bulk_WC_fpaths_tims <- "/Users/jasonderks/Nuc_data/DATA_bulk_WC" #BR 1, 2, 3, 4, 5, 6
 
 ############ BULK PURITY
-bulk_purity_fpath_timsTOFSCP <- "/work/slavov/JD/DATA_bulk_purity" 
+bulk_purity_fpath_timsTOFSCP <- "/Users/jasonderks/Nuc_data/DATA_bulk_purity" 
 
 ############ siRNA
 bulk_nuc_siRNA_all_fpath <- "/work/slavov/JD/DATA_siRNA_nuc_new"
@@ -28,7 +28,7 @@ bulk_WC_siRNA_all_fpath <- "/work/slavov/JD/DATA_siRNA_WC_new"
 
 ############ META
 meta_path <- "/work/slavov/JD/META/Meta_SC_SN_04122024_Prep1_2_3_6_final.tsv"
-meta_bulk_path_timsTOFSCP <- "/work/slavov/JD/META/Meta_THP1Bulk_01172024_timsTOFSCP.tsv"
+meta_bulk_path_timsTOFSCP <- "Meta_data/Meta_THP1Bulk_01172024_timsTOFSCP.tsv"
 meta_bulk_path_timsTOFSCP_siRNA <- "/work/slavov/JD/META/Meta_THP1Bulk_siRNA_01222024_v3.tsv"
 
 ############ Human yeast
@@ -36,13 +36,13 @@ HY_fpath <- "/work/slavov/JD/DATA_HY"
 
 
 ############ MISC:
-masses_fpath <- "/work/slavov/JD/Misc_files/uniprot_masses.tsv" # Protein mass info
-SP <- "/work/slavov/JD/Misc_files/swissprot_genes_10072023.tsv" # Swissprot info
-HL_path <- "/work/slavov/JD/Misc_files/SILAC_protein_turnOver/protein half lives high qual-Table 1.tsv" # Half life data
-markers_fpath <- "/work/slavov/JD/Misc_files/Subcellular_protein_07102022.tsv" # Subcellular protein markers
-NPC_regions <- "/work/slavov/JD/Misc_files/NUP_regions.tsv"
-NPC_scaffoldProts <- "/work/slavov/JD/Misc_files/NPC_scaffoldProts_Mathieson2018.tsv"
-all_TFs <- "/work/slavov/JD/Misc_files/TF_names_v_1.01.txt"
+masses_fpath <- "Misc_files/uniprot_masses.tsv" # Protein mass info
+SP <- "Misc_files/swissprot_genes_10072023.tsv" # Swissprot info
+HL_path <- "Misc_files/protein half lives high qual-Table 1.tsv" # Half life data
+markers_fpath <- "Misc_files/Subcellular_protein_07102022.tsv" # Subcellular protein markers
+NPC_regions <- "Misc_files/NUP_regions.tsv"
+NPC_scaffoldProts <- "Misc_files/NPC_scaffoldProts_Mathieson2018.tsv"
+all_TFs <- "Misc_files/TF_names_v_1.01.txt"
 all_TFs <- read.delim(all_TFs, header=F)
 
 DA_TFs_to_label <- c("JUN","JUNB","FOS","NFKB1","NFKB2","REL","RELA","ATF3")

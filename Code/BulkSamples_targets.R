@@ -59,14 +59,20 @@ list(
   
   # VOLCANO PLOT BULK WC and NUC
   tar_target(DA_plot_bulk_NUC_WC, pD_plot_DA_WC_NUC(MsEmpire_bulk_BR123456_merged, MsEmpire_bulk_BR123456_nofilt_WC_merged, SelectCond="min_60"),format = "qs"),
-  
+
+  # FIGURE 1a: number of differentially abundant proteins (5% FDR), nuclei vs whole cells
+  tar_target(DA_counts_bulk_NUC_WC, pD_plot_DA_counts(MsEmpire_bulk_BR123456_merged, MsEmpire_bulk_BR123456_nofilt_WC_merged, fdr=0.05),format = "qs"),
+
   #######################################################
   ############## Bulk purity analysis:  #################
   #######################################################
   tar_target(data_nuc_bulk_purity, pD_get_data(bulk_purity_fpath_timsTOFSCP, meta_bulk_path_timsTOFSCP, filter=F, TQV_threshold=1.1, CQV_threshold=0.3, proteotypic=T, ppm=5, mono_only=T, correct_IsoEnv=T),format = "qs"),
   tar_target(dat_bulk_maxLFQ_purity, diann_maxlfq(data_nuc_bulk_purity, group.header="Genes", id.header = "seqcharge", quantity.header = "Ms1.Area_iso"),format = "qs"),
   tar_target(dat_bulk_maxLFQ_m_purity, pD_melt_MaxLFQ(dat_bulk_maxLFQ_purity, meta_bulk_path_timsTOFSCP),format = "qs"),
-  tar_target(dat_bulk_purity, pD_bulk_purity(dat_bulk_maxLFQ_m_purity, markers_fpath),format = "qs")
+  tar_target(dat_bulk_purity, pD_bulk_purity(dat_bulk_maxLFQ_m_purity, markers_fpath),format = "qs"),
+
+  # SUPP DATA FIG. 1 per-protein averages over biological replicates + mean +/- SD across proteins, one facet per LPS time point
+  tar_target(dat_bulk_purity_byCond_proteins, pD_bulk_purity_byCond_proteins(dat_bulk_purity, order_by="timepoint"),format = "qs")
 
 )
 

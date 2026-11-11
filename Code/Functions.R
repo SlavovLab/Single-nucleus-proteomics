@@ -2993,3 +2993,163 @@ pD_SN_PSEA_plot <- function(PSEA_TS_cor, GOs=c("use these GOs")){
   return(plot_cor_rank)
 }
 
+
+
+#######################################################################
+## Figure 1a: number of differentially abundant proteins (5% FDR),
+## nuclear vs whole-cell, after 10 / 30 / 60 min LPS.
+## NUC / WC are the merged MS-EmpiRe outputs (pD_merge_MSEmpire):
+##   MsEmpire_bulk_BR123456_merged, MsEmpire_bulk_BR123456_nofilt_WC_merged
+#######################################################################
+pD_plot_DA_counts <- function(NUC, WC, conds = c("min_10", "min_30", "min_60"), fdr = 0.05,
+                              filename = NULL, spec_width = 3.4, spec_height = 2.6){
+  cond_labs <- c(min_10 = "10 minutes", min_30 = "30 minutes", min_60 = "60 minutes")
+  NUC <- data.frame(NUC); WC <- data.frame(WC)
+  NUC$type <- "Nuclear proteome"
+  WC$type  <- "Whole-cell proteome"
+  keep_cols <- c("Gene", "Cond", "p.adj", "type")
+  counts <- rbind(NUC[, keep_cols], WC[, keep_cols]) %>%
+    dplyr::filter(Cond %in% conds) %>%
+    dplyr::group_by(Cond, type) %>%
+    dplyr::summarise(total = dplyr::n(), sig = sum(p.adj < fdr, na.rm = TRUE), .groups = "drop") %>%
+    dplyr::mutate(pct = 100 * sig / total,
+                  pct_lab = ifelse(pct < 0.1, "< 0.1%", paste0(sprintf("%.1f", pct), "%")),
+                  label = paste0(sig, " / ", total, "\n(", pct_lab, ")"),
+                  Cond = factor(cond_labs[Cond], levels = cond_labs[conds]),
+                  type = factor(type, levels = c("Nuclear proteome", "Whole-cell proteome")))
+
+  p <- ggplot(counts, aes(x = type, y = sig, fill = type)) +
+    geom_col(color = "black", width = 0.85, linewidth = 0.25) +
+    geom_text(aes(label = label), vjust = -0.15, size = 2.3, lineheight = 0.9) +
+    facet_wrap(~Cond, nrow = 1) +
+    scale_fill_manual(values = c("Nuclear proteome" = "grey75", "Whole-cell proteome" = "grey20")) +
+    scale_y_continuous(breaks = scales::breaks_width(100), expand = expansion(mult = c(0.03, 0.17))) +
+    labs(y = paste0("# differentially abundant\nproteins after LPS (", fdr * 100, "% FDR)"), x = NULL, fill = NULL) +
+    theme_bw(base_size = 8) +
+    theme(panel.grid = element_blank(),
+          axis.text.x = element_blank(), axis.ticks.x = element_blank(),
+          axis.text.y = element_text(color = "black"),
+          strip.background = element_rect(fill = "grey85", color = "grey30"),
+          strip.text = element_text(size = 8, margin = margin(1.5, 0, 1.5, 0)),
+          legend.position = "top", legend.key.size = unit(0.3, "cm"),
+          legend.margin = margin(0, 0, -4, 0), legend.text = element_text(size = 8))
+  if (!is.null(filename)) ggsave(filename, p, width = spec_width, height = spec_height)
+  return(list(plot = p, counts = counts))
+}
+
+#######################################################################
+## Extended Data Fig. 1: nuclear enrichment of bulk samples.
+## All functions take dat_bulk_purity (output of pD_bulk_purity) and use $fin:
+## per-sample, per-marker-protein log2(WC / NUC), normalized in each sample so that
+## the median nuclear-marker protein (Histones, Nucleoplasm, Nucleoli, Nuclear Membrane) = 0.
+## One "isolation" = one Celltype x BioRep, i.e. an independent nuclear isolation
+## (2 biological replicates x 4 LPS time points = 8 isolations).
+#######################################################################
+
+pD_purity_palette <- function(){
+  c("Nucleoplasm" = "#26335F", "Nucleoli" = "#2F5A8F", "Nuclear Membrane" = "#4F86BD", "Histones" = "#7DB3DE",
+    "Plasma Membrane" = "#8C1C13", "Mitochondria" = "#B0412A", "Golgi apparatus" = "#CC6236",
+    "ER" = "#E07F50", "Cytosol" = "#F0A070")
+}
+
+pD_purity_prep <- function(dat_bulk_purity, conds = c("NT", "min_10", "min_30", "min_60")){
+  cond_labs <- c(NT = "NT", min_10 = "10 min LPS", min_30 = "30 min LPS", min_60 = "60 min LPS")
+  comps <- names(pD_purity_palette())
+  fin <- data.frame(dat_bulk_purity$fin)
+  fin <- fin[!is.na(fin$Subcellular) & fin$Subcellular %in% comps, ]
+  fin <- fin[abs(fin$WC_nuc) != 8, ] # drop the +/-8 placeholders (protein absent from one fraction)
+  # Celltype_rep = paste0(Celltype, BioRep); split it back
+  fin$Cond <- NA_character_
+  for (cn in conds) {
+    hit <- startsWith(fin$Celltype_rep, cn) & nchar(fin$Celltype_rep) > nchar(cn)
+    fin$Cond[hit] <- cn
+  }
+  fin <- fin[!is.na(fin$Cond), ]
+  fin$BioRep <- substring(fin$Celltype_rep, nchar(fin$Cond) + 1)
+  fin$BioRep_lab <- paste0("Bio rep ", fin$BioRep)
+  fin$Cond_lab <- factor(cond_labs[fin$Cond], levels = cond_labs[conds])
+  fin$Subcellular <- factor(fin$Subcellular, levels = rev(comps)) # Nucleoplasm on top
+  fin$y <- as.numeric(fin$Subcellular)
+  fin$Nuclear <- ifelse(grepl("Nuc|His", fin$Subcellular), "Nuclear", "Non-nuclear")
+  return(fin)
+}
+
+#### Original layout (one facet per biological replicate x time point); target: dat_bulk_purity_perSample
+pD_bulk_purity_perSample <- function(dat_bulk_purity){
+  fin <- pD_purity_prep(dat_bulk_purity)
+  meds <- fin %>% dplyr::group_by(BioRep_lab, Cond_lab, Subcellular, y) %>%
+    dplyr::summarise(med = median(WC_nuc), .groups = "drop")
+  set.seed(1)
+  fin$y_j <- fin$y + runif(nrow(fin), -0.22, 0.22)
+  ggplot(fin) +
+    geom_vline(xintercept = 0, linetype = "dashed", linewidth = 0.3) +
+    geom_point(aes(x = WC_nuc, y = y_j, color = Subcellular), alpha = 0.75, size = 1.3, stroke = 0) +
+    geom_segment(data = meds, aes(x = med, xend = med, y = y - 0.4, yend = y + 0.4), linewidth = 0.9) +
+    facet_grid(Cond_lab ~ BioRep_lab) +
+    scale_color_manual(values = pD_purity_palette()) +
+    scale_y_continuous(breaks = seq_along(levels(fin$Subcellular)), labels = levels(fin$Subcellular),
+                       expand = expansion(add = 0.5)) +
+    labs(x = expression(Log[2]*", Whole cell / Nuclear fraction"), y = NULL) +
+    theme_bw(base_size = 10) +
+    theme(legend.position = "none", panel.grid.minor = element_blank(),
+          axis.text = element_text(color = "black"))
+}
+
+
+
+#### Supp Fig. 1 (revision, per time point, protein level)
+pD_bulk_purity_byCond_proteins <- function(dat_bulk_purity, order_by = c("timepoint", "overall"), decreasing = TRUE,
+                                           min_biorep = 2, x_breaks = seq(-3, 9, 3), ncol = 2){
+  order_by <- match.arg(order_by)
+  fin <- pD_purity_prep(dat_bulk_purity)
+  pal <- pD_purity_palette()
+  comps <- levels(fin$Subcellular)
+  n_br <- dplyr::n_distinct(fin$BioRep)
+  sgn <- if (decreasing) -1 else 1
+
+  ## per-protein mean and SD across biological replicates, per time point
+  prot <- fin %>% dplyr::group_by(Cond_lab, Subcellular, y, Gene) %>%
+    dplyr::summarise(mean = mean(WC_nuc), sd = sd(WC_nuc), n_biorep = dplyr::n(), .groups = "drop") %>%
+    dplyr::filter(n_biorep >= min(min_biorep, n_br))
+
+  ## order proteins within each compartment by their mean ratio
+  if (order_by == "overall") {
+    ord <- fin %>% dplyr::filter(Gene %in% prot$Gene) %>%
+      dplyr::group_by(Subcellular, Gene) %>% dplyr::summarise(o = mean(WC_nuc), .groups = "drop") %>%
+      dplyr::group_by(Subcellular) %>%
+      dplyr::mutate(rank = rank(sgn * o, ties.method = "first"), k = dplyr::n()) %>% dplyr::ungroup()
+    prot <- prot %>% dplyr::left_join(ord %>% dplyr::select(Subcellular, Gene, rank, k), by = c("Subcellular", "Gene"))
+  } else {
+    prot <- prot %>% dplyr::group_by(Cond_lab, Subcellular) %>%
+      dplyr::mutate(rank = rank(sgn * mean, ties.method = "first"), k = dplyr::n()) %>% dplyr::ungroup()
+  }
+  prot$y_p <- prot$y - 0.4 + 0.8 * (prot$rank - 0.5) / prot$k
+
+  ## mean of the protein means (plotted) and SD across proteins (table only), per compartment and time point
+  comp <- prot %>% dplyr::group_by(Cond_lab, Subcellular, y) %>%
+    dplyr::summarise(mean_of_proteins = mean(mean), sd_of_proteins = sd(mean), n_proteins = dplyr::n(),
+                     .groups = "drop") %>%
+    dplyr::mutate(fold_WC_over_Nuc = 2^mean_of_proteins)
+
+  p <- ggplot(prot) +
+    annotate("rect", xmin = -Inf, xmax = Inf, ymin = length(comps) - 3.5, ymax = Inf, fill = "grey92", alpha = 0.6) +
+    geom_vline(xintercept = 0, linetype = "dashed", linewidth = 0.3) +
+    geom_errorbar(aes(xmin = mean - sd, xmax = mean + sd, y = y_p, color = Subcellular),
+                  orientation = "y", width = 0, linewidth = 0.3, alpha = 0.45) +
+    geom_point(aes(x = mean, y = y_p, color = Subcellular), size = 1.1, alpha = 0.9, stroke = 0) +
+    geom_segment(data = comp, aes(x = mean_of_proteins, xend = mean_of_proteins, y = y - 0.46, yend = y + 0.46),
+                 linewidth = 1.1) +
+    facet_wrap(~Cond_lab, ncol = ncol) +
+    scale_color_manual(values = pal, guide = "none") +
+    scale_x_continuous(breaks = x_breaks) +
+    scale_y_continuous(breaks = seq_along(comps), labels = comps, expand = expansion(add = 0.5)) +
+    labs(x = expression(Log[2]*", Whole cell / Nuclear fraction"), y = NULL,
+         title = bquote("Marker proteins (mean" %+-% "SD across" ~ .(n_br) ~ "biological replicates); black line = mean of protein means")) +
+    theme_bw(base_size = 8) +
+    theme(panel.grid.minor = element_blank(), panel.grid.major.y = element_blank(),
+          axis.text = element_text(color = "black"), plot.title = element_text(size = 8),
+          strip.placement = "outside", strip.background = element_rect(fill = "grey85", color = "grey30"),
+          strip.text = element_text(size = 8, margin = margin(1.5, 0, 1.5, 0)))
+
+  return(list(plot = p, protein_summary = prot, compartment_summary = comp))
+}

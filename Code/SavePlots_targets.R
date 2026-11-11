@@ -5,8 +5,9 @@ list(
   ####################### save plots
   
   ### bulk
-  tar_target(bulk_purity_perSample_plot, save_plots(dat_bulk_purity_perSample, myfilename="Figures/Bulk_purity_perSample.pdf",mywidth=4.7,myheight=4.7)),
-
+  tar_target(bulk_DA_counts_plot, save_plots(DA_counts_bulk_NUC_WC$plot, myfilename="Figures/Bulk_DA_counts.pdf",mywidth=3.4,myheight=2.6)), # Fig. 1a
+  tar_target(bulk_purity_byCond_proteins_plot, save_plots(dat_bulk_purity_byCond_proteins$plot, myfilename="Figures/Bulk_purity_byCond_proteins.pdf",mywidth=7.2,myheight=6.5)), # Supp Fig. 1
+ 
   #### siRNA KDs
   tar_target(siRNA_WC_plot, save_plots_list(siRNA_WC_all$plot_list, myfilename="Figures/Supp/siRNA_KDs_WC",mywidth=3,myheight=3)),
   tar_target(siRNA_NUC_plot, save_plots_list(siRNA_NUC_all$plot_list, myfilename="Figures/Supp/siRNA_KDs_NUC",mywidth=3,myheight=3)),
